@@ -17,7 +17,7 @@ const SearchComponent = ({
         placeholder="Buscar por nombre"
         value={searchQuery}
         onChange={handleSearch}
-        className="pl-10 w-full p-2 rounded-lg border border-white bg-black text-white focus:outline-none "
+        className="pl-10 w-full p-2 rounded-lg border border-white bg-[var(--background)] text-white focus:outline-none "
       />
     </div>
   );

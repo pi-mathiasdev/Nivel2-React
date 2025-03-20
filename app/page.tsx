@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 import { setPeople } from "./store/peopleSlice";
-import Loading from "./components/Loading";
+import Loading from "./components/loading";
 import { IPeople } from "./interfaces/IPeople.model";
-import SearchComponent from "./components/SearchComponent";
+import SearchComponent from "./components/searchComponent";
+import CardPeople from "./components/cardPeople";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,15 +57,8 @@ export default function Home() {
             {loading ? (
               <Loading />
             ) : filteredPeople.length > 0 ? (
-              filteredPeople.map((item: IPeople, index: number) => (
-                <div
-                  key={index}
-                  className="bg-gray-400 flex p-4 justify-center items-center rounded-3xl aspect-w-2 aspect-h-1"
-                >
-                  <h3>
-                    {item.name} - {item.gender}
-                  </h3>
-                </div>
+              filteredPeople.map((people: IPeople, index: number) => (
+                <CardPeople key={index} people={people} />
               ))
             ) : (
               <p className="text-center text-white col-span-full">
