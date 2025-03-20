@@ -1,55 +1,69 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import { useDispatch, useSelector } from "react-redux";
+import { setPeople } from "./store/peopleSlice";
+import Loading from "./components/Loading";
+import { IPeople } from "./interfaces/IPeople.model";
+import SearchComponent from "./components/SearchComponent";
 
 export default function Home() {
-  const itemsPerPage = 6;
-  const allItems = Array.from({ length: 15 }, (_, i) => `Item ${i + 1}`);
   const [searchQuery, setSearchQuery] = useState("");
-  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const people = useSelector((state: { people: IPeople[] }) => state.people);
 
-  // Filtrar elementos por búsqueda
-  const filteredItems = allItems.filter((item) =>
-    item.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  //#region Fetch Data
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("/api/people");
+        const data = await response.json();
+        dispatch(setPeople(data.results));
+      } catch (error) {
+        console.error("Error al obtener personas:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Calcular páginas después de filtrar
-  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
-  const paginatedItems = filteredItems.slice(
-    (page - 1) * itemsPerPage,
-    page * itemsPerPage
-  );
+    fetchData();
+  }, [dispatch]);
+  //#endregion
 
-  // Resetear a la primera página si cambia la búsqueda
+  //#region Search
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setPage(1); // Resetear a la página 1 al filtrar
   };
 
+  const filteredPeople = people.filter((person: IPeople) =>
+    person.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  //#endregion
+
   return (
-    <main className="container mx-auto p-4 h-screen flex flex-col md:flex-row gap-4 ">
-      <div className="w-full md:w-[70%] flex flex-col h-full ">
-        <div className="mb-4 relative">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-            <h1 className="h-4 w-4">B</h1>
-          </div>
-          <input
-            type="text"
-            placeholder="Buscar..."
-            value={searchQuery}
-            onChange={handleSearch}
-            className="pl-10 w-full p-2 rounded-lg"
-          />
-        </div>
+    <main className="container mx-auto p-5 h-screen flex flex-col md:flex-row gap-4">
+      <div className="w-full flex flex-col h-full mt-3">
+        <div className="text-4xl text-amber-400 font-bold mb-4">StarWars</div>
+        <SearchComponent
+          searchQuery={searchQuery}
+          handleSearch={handleSearch}
+        />
 
         <div className="flex-1 flex flex-col">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {paginatedItems.length > 0 ? (
-              paginatedItems.map((item, index) => (
+            {loading ? (
+              <Loading />
+            ) : filteredPeople.length > 0 ? (
+              filteredPeople.map((item: IPeople, index: number) => (
                 <div
                   key={index}
-                  className="bg-blue-400 flex p-4 justify-center items-center rounded-3xl aspect-square"
+                  className="bg-gray-400 flex p-4 justify-center items-center rounded-3xl aspect-w-2 aspect-h-1"
                 >
-                  <h3>{item}</h3>
+                  <h3>
+                    {item.name} - {item.gender}
+                  </h3>
                 </div>
               ))
             ) : (
@@ -58,32 +72,6 @@ export default function Home() {
               </p>
             )}
           </div>
-
-          {filteredItems.length > itemsPerPage && (
-            <div className="flex justify-center items-center gap-2 mt-4">
-              <button
-                onClick={() => setPage(page - 1)}
-                disabled={page === 1}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg disabled:opacity-50"
-              >
-                ←
-              </button>
-
-              <button
-                onClick={() => setPage(page + 1)}
-                disabled={page === totalPages}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg disabled:opacity-50"
-              >
-                →
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="w-full md:w-[30%] h-full ">
-        <div className="bg-blue-400 h-full flex justify-center items-center rounded-3xl p-4">
-          <h4 className="text-white">Card Principal</h4>
         </div>
       </div>
     </main>
