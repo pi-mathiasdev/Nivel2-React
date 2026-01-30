@@ -53,19 +53,21 @@ export default function Home() {
         />
 
         <div className="flex-1 flex flex-col">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {loading ? (
-              <Loading />
-            ) : filteredPeople.length > 0 ? (
-              filteredPeople.map((people: IPeople, index: number) => (
+          {loading && <Loading />}
+
+          {!loading && filteredPeople.length === 0 && (
+            <p className="text-center text-white col-span-full">
+              No se encontraron resultados
+            </p>
+          )}
+
+          {!loading && filteredPeople.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+              {filteredPeople.map((people: IPeople, index: number) => (
                 <CardPeople key={index} people={people} />
-              ))
-            ) : (
-              <p className="text-center text-white col-span-full">
-                No se encontraron resultados
-              </p>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </main>
